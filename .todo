@@ -1,0 +1,71 @@
+# Spotfiy Integration must be added.
+# OAUTH with Spotify
+
+
+# 1. Hazırlık: Spotify Developer Kaydı
+# Spotify verilerine erişmek için önce bir uygulama oluşturmanız gerekir:
+#  * Spotify Developer Dashboard (https://developer.spotify.com/dashboard/)
+#    adresine gidin.
+# * "Create app" diyerek yeni bir uygulama oluşturun.
+#   * Client ID ve Client Secret bilgilerini not edin.
+#   * Redirect URI kısmına http://localhost:8080 gibi bir adres ekleyin (bu,
+#     giriş yaptıktan sonra tarayıcının yönleneceği adrestir).
+
+# 2. Gerekli Kütüphaneyi Kurma
+# Python dünyasında Spotify için en popüler kütüphane Spotipy'dir:
+#   1 pip install spotipy
+
+# 3. Kimlik Doğrulama (Authentication)
+# Kullanıcının çalma listelerine erişmek ve müziği kontrol etmek için
+# "Authorization Code Flow" kullanmalısınız. spotipy bunu sizin için
+# kolaylaştırır.
+
+# 4. Projeye Entegrasyon Stratejisi
+# main.py dosyanıza şu yapıyı ekleyebilirsiniz:
+
+#  A. Kimlik Bilgilerini Yönetme
+#  Güvenlik için client_id ve client_secret bilgilerini kodun içine yazmak
+#  yerine bir .env dosyasında veya ortam değişkeni (environment variable)
+#  olarak tutmanızı öneririm.
+
+#  B. Spotify İstemcisini Hazırlama
+
+#    1 import spotipy
+#    2 from spotipy.oauth2 import SpotifyOAuth
+#    3
+#    4 # Gerekli izinler (scopes)
+#    5 SCOPE = "user-library-read playlist-read-private
+#    6       user-modify-playback-state"
+#    7
+#    8 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+#    9     client_id="SİZİN_CLIENT_ID",
+#   10     client_secret="SİZİN_CLIENT_SECRET",
+#   11     redirect_uri="http://localhost:8080",
+#   12     scope=SCOPE
+))
+
+#  C. Textual UI ile Bağlama
+#  Mevcut on_mount metodunuzda Spotify'dan verileri çekip DataTable ve ListView
+#    widget'larınıza doldurabilirsiniz:
+
+#    1     async def on_mount(self) -> None:
+#    2         # Spotify'dan çalma listelerini al
+#    3         results = sp.current_user_playlists()
+#    4         playlist_list = self.query_one("#playlist-list")
+#    5
+#    6         for item in results['items']:
+#    7             playlist_list.append(ListItem(Label(item['name'])))
+#    8
+#    9         # Şarkı listesini güncellemek için DataTable kullanın
+#   10         table = self.query_one(DataTable)
+#   11         # ... Spotify verilerini buraya ekleyin ...
+
+#  Karşılaşabileceğiniz Zorluklar:
+#   1. Async/Sync Çatışması: spotipy varsayılan olarak senkrondur, ancak
+#      Textual asenkrondur. Uzun süren ağ istekleri UI'ı dondurabilir. Bu
+#      yüzden Spotify çağrılarını run_in_executor ile veya httpx tabanlı
+#      asenkron Spotify kütüphaneleriyle yapmayı düşünebilirsiniz.
+#   2. Giriş Ekranı: Uygulama ilk çalıştığında spotipy bir tarayıcı penceresi
+#      açacaktır. Kullanıcı onay verdikten sonra terminale geri dönebilir.
+#  Bir sonraki adım olarak ne yapmak istersiniz? İsterseniz temel bir Spotify
+#  bağlantısı içeren bir kod taslağı oluşturabilirim.
